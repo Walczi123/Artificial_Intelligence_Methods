@@ -157,6 +157,7 @@ class Board:
 		# self.update()	
 	
 	def drawScoreBoard(self):
+		print("Draw")
 		#Deleting prior score elements
 		g.screen.delete("score")
 

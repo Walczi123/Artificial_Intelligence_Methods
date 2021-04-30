@@ -5,10 +5,10 @@ from random import *
 from copy import deepcopy
 from tkinter import font
 import Game.othello as ot
-import Game.globals as g
+import Game.globals as cdf
 
 
-gl = g.Globals()
+g = cdf.Globals()
 
 def clickHandle(event):
     xMouse = event.x
@@ -57,7 +57,7 @@ def playGame():
     # Draw the background
     ot.drawGridBackground()
     # Create the g.board and update it
-    g.board = ot.Board(gl)
+    g.board = ot.Board(g)
     g.board.update()
 
 
@@ -117,9 +117,9 @@ def runGame():
 	g.screen.update()
 
 if __name__ == "__main__":
-    # global gl
+#     # global gl
 
-    # gl = g.Globals()
+    #     # gl = g.Globals()
     print("here")
     runGame()
 
