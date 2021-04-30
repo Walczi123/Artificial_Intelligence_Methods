@@ -5,26 +5,28 @@ from random import *
 from copy import deepcopy
 from tkinter import font
 
+import Game.globals as g 
 # from tkinter import tkFont
 
 #Tkinter setup
-root = Tk()
-screen = Canvas(root, width=500, height=600, background="DarkOliveGreen4",highlightthickness=0)
-screen.pack()
-board = None
-moves = None 
-depth = None
-running = False
-nodes = None
+# root = Tk()
+# screen = Canvas(root, width=500, height=600, background="DarkOliveGreen4",highlightthickness=0)
+# screen.pack()
+# board = None
+# moves = None 
+# depth = None
+# running = False
+# nodes = None
 
-computerPlaying = False
+# computerPlaying = False
 
 
 class Board:
-	def __init__(self, player = 0):
+	def __init__(self, globalValues, player = 0):
 		self.player = player
 		self.passed = False
 		self.won = False
+		self.g = globalValues
 		#Initializing an empty board
 		# self.placements = [[None for _ in range(8)] for _ in range(8)]
 		self.placements = []
@@ -44,104 +46,103 @@ class Board:
 
 
 	def update(self):
-		screen.delete("highlight")
-		screen.delete("tile")
-		screen.delete("player_signalization")
+		g.screen.delete("highlight")
+		g.screen.delete("tile")
+		g.screen.delete("player_signalization")
 		for x in range(8):
 			for y in range(8):
 				#Could replace the circles with images later, if I want
 				if self.oldplacements[x][y]=="w":
-					screen.create_oval(54+50*x,54+50*y,96+50*x,96+50*y,tags="tile {0}-{1}".format(x,y),fill="#aaa",outline="#aaa")
-					screen.create_oval(54+50*x,52+50*y,96+50*x,94+50*y,tags="tile {0}-{1}".format(x,y),fill="#fff",outline="#fff")
+					g.screen.create_oval(54+50*x,54+50*y,96+50*x,96+50*y,tags="tile {0}-{1}".format(x,y),fill="#aaa",outline="#aaa")
+					g.screen.create_oval(54+50*x,52+50*y,96+50*x,94+50*y,tags="tile {0}-{1}".format(x,y),fill="#fff",outline="#fff")
 
 				elif self.oldplacements[x][y]=="b":
-					screen.create_oval(54+50*x,54+50*y,96+50*x,96+50*y,tags="tile {0}-{1}".format(x,y),fill="#000",outline="#000")
-					screen.create_oval(54+50*x,52+50*y,96+50*x,94+50*y,tags="tile {0}-{1}".format(x,y),fill="#111",outline="#111")
+					g.screen.create_oval(54+50*x,54+50*y,96+50*x,96+50*y,tags="tile {0}-{1}".format(x,y),fill="#000",outline="#000")
+					g.screen.create_oval(54+50*x,52+50*y,96+50*x,94+50*y,tags="tile {0}-{1}".format(x,y),fill="#111",outline="#111")
 		#Animation of new tiles
-		screen.update()
+		g.screen.update()
 		for x in range(8):
 			for y in range(8):
 				#Could replace the circles with images later, if I want
 				if self.placements[x][y] != self.oldplacements[x][y] and self.placements[x][y] == "w":
-					screen.delete("{0}-{1}".format(x,y))
+					g.screen.delete("{0}-{1}".format(x,y))
 					#42 is width of tile so 21 is half of that
 					#Shrinking
 					for i in range(21):
-						screen.create_oval(54+i+50*x,54+i+50*y,96-i+50*x,96-i+50*y,tags="tile animated",fill="#000",outline="#000")
-						screen.create_oval(54+i+50*x,52+i+50*y,96-i+50*x,94-i+50*y,tags="tile animated",fill="#111",outline="#111")
+						g.screen.create_oval(54+i+50*x,54+i+50*y,96-i+50*x,96-i+50*y,tags="tile animated",fill="#000",outline="#000")
+						g.screen.create_oval(54+i+50*x,52+i+50*y,96-i+50*x,94-i+50*y,tags="tile animated",fill="#111",outline="#111")
 						if i%3==0:
 							sleep(0.01)
-						screen.update()
-						screen.delete("animated")
+						g.screen.update()
+						g.screen.delete("animated")
 					#Growing
 					for i in reversed(range(21)):
-						screen.create_oval(54+i+50*x,54+i+50*y,96-i+50*x,96-i+50*y,tags="tile animated",fill="#aaa",outline="#aaa")
-						screen.create_oval(54+i+50*x,52+i+50*y,96-i+50*x,94-i+50*y,tags="tile animated",fill="#fff",outline="#fff")
+						g.screen.create_oval(54+i+50*x,54+i+50*y,96-i+50*x,96-i+50*y,tags="tile animated",fill="#aaa",outline="#aaa")
+						g.screen.create_oval(54+i+50*x,52+i+50*y,96-i+50*x,94-i+50*y,tags="tile animated",fill="#fff",outline="#fff")
 						if i%3==0:
 							sleep(0.01)
-						screen.update()
-						screen.delete("animated")
-					screen.create_oval(54+50*x,54+50*y,96+50*x,96+50*y,tags="tile",fill="#aaa",outline="#aaa")
-					screen.create_oval(54+50*x,52+50*y,96+50*x,94+50*y,tags="tile",fill="#fff",outline="#fff")
-					screen.update()
+						g.screen.update()
+						g.screen.delete("animated")
+					g.screen.create_oval(54+50*x,54+50*y,96+50*x,96+50*y,tags="tile",fill="#aaa",outline="#aaa")
+					g.screen.create_oval(54+50*x,52+50*y,96+50*x,94+50*y,tags="tile",fill="#fff",outline="#fff")
+					g.screen.update()
 
 				elif self.placements[x][y]!=self.oldplacements[x][y] and self.placements[x][y]=="b":
-					screen.delete("{0}-{1}".format(x,y))
+					g.screen.delete("{0}-{1}".format(x,y))
 					#42 is width of tile so 21 is half of that
 					#Shrinking
 					for i in range(21):
-						screen.create_oval(54+i+50*x,54+i+50*y,96-i+50*x,96-i+50*y,tags="tile animated",fill="#aaa",outline="#aaa")
-						screen.create_oval(54+i+50*x,52+i+50*y,96-i+50*x,94-i+50*y,tags="tile animated",fill="#fff",outline="#fff")
+						g.screen.create_oval(54+i+50*x,54+i+50*y,96-i+50*x,96-i+50*y,tags="tile animated",fill="#aaa",outline="#aaa")
+						g.screen.create_oval(54+i+50*x,52+i+50*y,96-i+50*x,94-i+50*y,tags="tile animated",fill="#fff",outline="#fff")
 						if i%3==0:
 							sleep(0.01)
-						screen.update()
-						screen.delete("animated")
+						g.screen.update()
+						g.screen.delete("animated")
 					#Growing
 					for i in reversed(range(21)):
-						screen.create_oval(54+i+50*x,54+i+50*y,96-i+50*x,96-i+50*y,tags="tile animated",fill="#000",outline="#000")
-						screen.create_oval(54+i+50*x,52+i+50*y,96-i+50*x,94-i+50*y,tags="tile animated",fill="#111",outline="#111")
+						g.screen.create_oval(54+i+50*x,54+i+50*y,96-i+50*x,96-i+50*y,tags="tile animated",fill="#000",outline="#000")
+						g.screen.create_oval(54+i+50*x,52+i+50*y,96-i+50*x,94-i+50*y,tags="tile animated",fill="#111",outline="#111")
 						if i%3==0:
 							sleep(0.01)
-						screen.update()
-						screen.delete("animated")
+						g.screen.update()
+						g.screen.delete("animated")
 
-					screen.create_oval(54+50*x,54+50*y,96+50*x,96+50*y,tags="tile",fill="#000",outline="#000")
-					screen.create_oval(54+50*x,52+50*y,96+50*x,94+50*y,tags="tile",fill="#111",outline="#111")
-					screen.update()
+					g.screen.create_oval(54+50*x,54+50*y,96+50*x,96+50*y,tags="tile",fill="#000",outline="#000")
+					g.screen.create_oval(54+50*x,52+50*y,96+50*x,94+50*y,tags="tile",fill="#111",outline="#111")
+					g.screen.update()
 		#Drawing of highlight circles
 		#Drawing player sygnalization box
 		if self.player == 0:
 			sleep(0.02)
-			screen.create_rectangle(60,455,440,465,tags="player_signalization", fill="white")
-		if self.player == 1 and not(computerPlaying):
+			g.screen.create_rectangle(60,455,440,465,tags="player_signalization", fill="white")
+		if self.player == 1 and not(g.computerPlaying):
 			sleep(0.02)
-			screen.create_rectangle(60,455,440,465,tags="player_signalization", fill="black")
+			g.screen.create_rectangle(60,455,440,465,tags="player_signalization", fill="black")
 		for x in range(8):
 			for y in range(8):
 				if self.player == 0:
 					if valid(self.placements,self.player,x,y):
 						# helv36 = font.Font(family='Helvetica', size=36, weight='bold')
-						# screen.create_text(68+50*x,68+50*y,32+50*(x+1),32+50*(y+1), anchor=W, font=("Helvetica",60), text="X")
-						screen.create_oval(68+50*x,68+50*y,32+50*(x+1),32+50*(y+1),tags="highlight",fill="grey78")
-				elif self.player == 1 and not(computerPlaying):
+						# g.screen.create_text(68+50*x,68+50*y,32+50*(x+1),32+50*(y+1), anchor=W, font=("Helvetica",60), text="X")
+						g.screen.create_oval(68+50*x,68+50*y,32+50*(x+1),32+50*(y+1),tags="highlight",fill="grey78")
+				elif self.player == 1 and not(g.computerPlaying):
 					if valid(self.placements,self.player,x,y):
-						screen.create_oval(68+50*x,68+50*y,32+50*(x+1),32+50*(y+1),tags="highlight",fill="grey30")
+						g.screen.create_oval(68+50*x,68+50*y,32+50*(x+1),32+50*(y+1),tags="highlight",fill="grey30")
 		if not self.won:
-			#Draw the scoreboard and update the screen
+			#Draw the scoreboard and update the g.screen
 			self.drawScoreBoard()
-			screen.update()
+			g.screen.update()
 		else:
-			screen.create_text(250,550,anchor="c",font=("Consolas",15), text="The game is done!")
+			g.screen.create_text(250,550,anchor="c",font=("Consolas",15), text="The game is done!")
 
 	#Moves to position
 	def boardMove(self,x,y):
-		global nodes
-		#Move and update screen
+		#Move and update g.screen
 		self.oldplacements = self.placements
 		# print("something")
-		if computerPlaying or self.player == 0 :
+		if g.computerPlaying or self.player == 0 :
 			self.oldplacements[x][y]="w" #change
-		elif not(computerPlaying):
+		elif not(g.computerPlaying):
 			print("here", self.oldplacements[x][y])
 			self.oldplacements[x][y]="b" #change
 			print("hereAfter", self.oldplacements[x][y])
@@ -156,9 +157,8 @@ class Board:
 		# self.update()	
 	
 	def drawScoreBoard(self):
-		global moves
 		#Deleting prior score elements
-		screen.delete("score")
+		g.screen.delete("score")
 
 		#Scoring based on number of tiles
 		player_score = 0
@@ -177,12 +177,12 @@ class Board:
 			player_colour = "white"
 			computer_colour = "black"
 
-		screen.create_oval(5,540,25,560,fill=player_colour,outline=player_colour)
-		screen.create_oval(380,540,400,560,fill=computer_colour,outline=computer_colour)
+		g.screen.create_oval(5,540,25,560,fill=player_colour,outline=player_colour)
+		g.screen.create_oval(380,540,400,560,fill=computer_colour,outline=computer_colour)
 
 		#Pushing text to screen
-		screen.create_text(30,550,anchor="w", tags="score",font=("Consolas", 50),fill="white",text=player_score)
-		screen.create_text(400,550,anchor="w", tags="score",font=("Consolas", 50),fill="black",text=computer_score)
+		g.screen.create_text(30,550,anchor="w", tags="score",font=("Consolas", 50),fill="white",text=player_score)
+		g.screen.create_text(400,550,anchor="w", tags="score",font=("Consolas", 50),fill="black",text=computer_score)
 
 		moves = player_score+computer_score
 
@@ -205,7 +205,7 @@ class Board:
 
 	
 def getPlayersColor():
-	if board.player==0:
+	if g.board.player==0:
 		colour = "w"
 	else:
 		colour = "b"
@@ -323,117 +323,117 @@ def valid(placements, player, x, y):
 			return valid
 
 
-def clickHandle(event):
-	global depth
-	xMouse = event.x
-	yMouse = event.y
-	if running:
-		print("running")
-		if xMouse>=450 and yMouse<=50:
-			root.destroy()
-		elif xMouse<=50 and yMouse<=50:
-			playGame()
-		else:
-			#Is it the player's turn?
-			if not(computerPlaying) or board.player == 0:
-				#Delete the highlights
-				x = int((event.x-50)/50)
-				y = int((event.y-50)/50)
-				print("x, y", x, y)
-				#Determine the grid index for where the mouse was clicked
+# def clickHandle(event):
+# 	global depth
+# 	xMouse = event.x
+# 	yMouse = event.y
+# 	if running:
+# 		print("running")
+# 		if xMouse>=450 and yMouse<=50:
+# 			root.destroy()
+# 		elif xMouse<=50 and yMouse<=50:
+# 			playGame()
+# 		else:
+# 			#Is it the player's turn?
+# 			if not(computerPlaying) or board.player == 0:
+# 				#Delete the highlights
+# 				x = int((event.x-50)/50)
+# 				y = int((event.y-50)/50)
+# 				print("x, y", x, y)
+# 				#Determine the grid index for where the mouse was clicked
 				
-				#If the click is inside the bounds and the move is valid, move to that location
-				if 0<=x<=7 and 0<=y<=7:
-					if valid(board.placements,board.player,x,y):
-						print("valid, x, y", x, y)
-						board.boardMove(x,y)
-	else:
-		print("else before played")
-		#Difficulty clicking
-		if 180<=xMouse<=310:
-			depth = 1
-			print("played")
-			playGame()
+# 				#If the click is inside the bounds and the move is valid, move to that location
+# 				if 0<=x<=7 and 0<=y<=7:
+# 					if valid(board.placements,board.player,x,y):
+# 						print("valid, x, y", x, y)
+# 						board.boardMove(x,y)
+# 	else:
+# 		print("else before played")
+# 		#Difficulty clicking
+# 		if 180<=xMouse<=310:
+# 			depth = 1
+# 			print("played")
+# 			playGame()
 
 
-def keyHandle(event):
-	symbol = event.keysym
-	if symbol.lower()=="r":
-		playGame()
-	elif symbol.lower()=="q":
-		root.destroy()
+# def keyHandle(event):
+# 	symbol = event.keysym
+# 	if symbol.lower()=="r":
+# 		playGame()
+# 	elif symbol.lower()=="q":
+# 		root.destroy()
 
 	
-def runGame():
-	global running
-	running = False
-	print("running", running)
-	#Title and shadow
-	screen.create_text(250,203,anchor="c",text="Othello",font=("Consolas", 50),fill="dark slate gray")
-	screen.create_text(250,200,anchor="c",text="Othello",font=("Consolas", 50),fill="white smoke")
+# def runGame():
+# 	global running
+# 	running = False
+# 	print("running", running)
+# 	#Title and shadow
+# 	screen.create_text(250,203,anchor="c",text="Othello",font=("Consolas", 50),fill="dark slate gray")
+# 	screen.create_text(250,200,anchor="c",text="Othello",font=("Consolas", 50),fill="white smoke")
 	
-	#Creating the play button
-	i=1
-	spacing = 130/2
-	screen.create_rectangle(25+155*1, 310, 155+155*i, 355, fill="dark slate gray", outline="dark slate gray")
-	screen.create_rectangle(25+155*1, 300, 155+155*i, 350, fill="cadet blue", outline="cadet blue")
-	screen.create_text(25+1*spacing+155*1,327,anchor="c",text="Play", font=("Consolas",25),fill="gainsboro")
-	screen.update()
+# 	#Creating the play button
+# 	i=1
+# 	spacing = 130/2
+# 	screen.create_rectangle(25+155*1, 310, 155+155*i, 355, fill="dark slate gray", outline="dark slate gray")
+# 	screen.create_rectangle(25+155*1, 300, 155+155*i, 350, fill="cadet blue", outline="cadet blue")
+# 	screen.create_text(25+1*spacing+155*1,327,anchor="c",text="Play", font=("Consolas",25),fill="gainsboro")
+# 	screen.update()
 
 #Method for drawing the gridlines
 def drawGridBackground(outline=True):
 	#If we want an outline on the board then draw one
 	if outline:
-		screen.create_rectangle(50,50,450,450,outline="#111")
+		g.screen.create_rectangle(50,50,450,450,outline="#111")
 
 	#Drawing the intermediate lines
 	for i in range(7):
 		lineShift = 50+50*(i+1)
 
 		#Horizontal line
-		screen.create_line(50,lineShift,450,lineShift,fill="#111")
+		g.screen.create_line(50,lineShift,450,lineShift,fill="#111")
 
 		#Vertical line
-		screen.create_line(lineShift,50,lineShift,450,fill="#111")
+		g.screen.create_line(lineShift,50,lineShift,450,fill="#111")
 
-	screen.update()
+	g.screen.update()
 
 def create_buttons():
 		#Restart button
 		#Background/shadow
-		screen.create_rectangle(0,5,50,55,fill="#000033", outline="#000033")
-		screen.create_rectangle(0,0,50,50,fill="#000088", outline="#000088")
+		g.screen.create_rectangle(0,5,50,55,fill="#000033", outline="#000033")
+		g.screen.create_rectangle(0,0,50,50,fill="#000088", outline="#000088")
 
 		#Arrow
-		screen.create_arc(5,5,45,45,fill="#000088", width="2",style="arc",outline="white",extent=300)
-		screen.create_polygon(33,38,36,45,40,39,fill="white",outline="white")
+		g.screen.create_arc(5,5,45,45,fill="#000088", width="2",style="arc",outline="white",extent=300)
+		g.screen.create_polygon(33,38,36,45,40,39,fill="white",outline="white")
 
 		#Quit button
 		#Background/shadow
-		screen.create_rectangle(450,5,500,55,fill="#330000", outline="#330000")
-		screen.create_rectangle(450,0,500,50,fill="#880000", outline="#880000")
+		g.screen.create_rectangle(450,5,500,55,fill="#330000", outline="#330000")
+		g.screen.create_rectangle(450,0,500,50,fill="#880000", outline="#880000")
 		#"X"
-		screen.create_line(455,5,495,45,fill="white",width="3")
-		screen.create_line(495,5,455,45,fill="white",width="3")
+		g.screen.create_line(455,5,495,45,fill="white",width="3")
+		g.screen.create_line(495,5,455,45,fill="white",width="3")
 		
-def playGame():
-	global board, running
-	running = True
-	screen.delete(ALL)
-	create_buttons()
-	#Draw the background
-	drawGridBackground()
-	#Create the board and update it
-	board = Board()
-	board.update()
+# def playGame():
+# 	global board, running
+# 	running = True
+# 	screen.delete(ALL)
+# 	create_buttons()
+# 	#Draw the background
+# 	drawGridBackground()
+# 	#Create the board and update it
+# 	board = Board()
+# 	board.update()
 
-runGame()
+# runGame()
 
-#Binding, setting
-screen.bind("<Button-1>", clickHandle)
-screen.bind("<Key>",keyHandle)
-screen.focus_set()
+# #Binding, setting
+# screen.bind("<Button-1>", clickHandle)
+# screen.bind("<Key>",keyHandle)
+# screen.focus_set()
 
-#Run forever
-root.wm_title("Othello")
-root.mainloop()
+# #Run forever
+# root.wm_title("Othello")
+# root.mainloop()
