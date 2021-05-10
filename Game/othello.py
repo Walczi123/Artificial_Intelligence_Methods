@@ -30,7 +30,11 @@ class Board:
 		#Initializing old values
 		self.oldplacements = self.placements
 
+	# 
 	def update(self):
+		""" Redraw the board, animate changes beetween moves, 
+			add player possible moves signalization
+		"""
 		self.g.screen.delete("highlight")
 		self.g.screen.delete("tile")
 		self.g.screen.delete("player_signalization")
@@ -46,6 +50,7 @@ class Board:
 					self.g.screen.create_oval(54+50*x,52+50*y,96+50*x,94+50*y,tags="tile {0}-{1}".format(x,y),fill="#111",outline="#111")
 		#Animation of new tiles
 		self.g.screen.update()
+		sleep(0.12)
 		for x in range(8):
 			for y in range(8):
 				#Could replace the circles with images later, if I want
@@ -120,8 +125,10 @@ class Board:
 		else:
 			self.g.screen.create_text(250,550,anchor="c",font=("Consolas",15), text="The game is done!")
 
-	#Moves to position
+	
 	def boardMove(self,x,y):
+		""" Moves to position and updates 'oldplacements' table
+		"""
 		#Move and update self.g.screen
 		self.oldplacements = self.placements
 		# print("something")
@@ -139,6 +146,7 @@ class Board:
 		
 	
 	def drawScoreBoard(self):
+		
 		print("Draw")
 		#Deleting prior score elements
 		self.g.screen.delete("score")
@@ -169,14 +177,20 @@ class Board:
 
 		moves = player_score+computer_score
 
-	#METHOD: Test if player must pass: if they do, switch the player
+ 
 	def mustPass(self):
-		mustPass = True
+		""" 
+		Tests if player must pass this round
+
+		Returns:
+			[type]: boolean
+		"""
+		must_pass = True
 		for x in range(8):
 			for y in range(8):
 				if self.valid(self.player,x,y):
-					mustPass=False
-		return mustPass
+					must_pass=False
+		return must_pass
 	
 	
 	def getPlayersColor(self):
@@ -187,6 +201,11 @@ class Board:
 		return colour
 
 	def move(self, x, y):
+		""" Make move and reverse all influenced oponnent's disks 
+
+		Returns:
+			[type]: array - board after move
+		"""
 		#Must copy the passedArray so we don't alter the original
 		array = deepcopy(self.placements)
 		#Set colour and set the moved location to be that colour
@@ -246,6 +265,18 @@ class Board:
 
 	
 	def checkForAnyLine(self, colour, x, y, i, j):
+		""" Check if move creates a line. 
+			So if there is a line from (x,y) to another player's colored disk going through the neighbour (i,j), 
+			where (i,j) has the opponent's color
+
+		Args:
+			colour ([type]): [description]
+			x ([type]): move's x coordinate
+			i ([type]): neighbour's x coordinate 
+
+		Returns:
+			[type]: boolean - true if it forms a correct line
+		"""
 		neighX = i
 		neighY = j
 		
@@ -274,6 +305,16 @@ class Board:
 
 	#Checks if a move is valid for a given array.
 	def valid(self, player, x, y):
+		""" Check if placing disk on (x,y) is a valid move
+
+		Args:
+			player ([type]): [description]
+			x ([type]): [description]
+			y ([type]): [description]
+
+		Returns:
+			[type]: [description]
+		"""
 		#Sets player colour
 		colour = self.getPlayersColor()
 		#If there's already a piece there, it's an invalid move

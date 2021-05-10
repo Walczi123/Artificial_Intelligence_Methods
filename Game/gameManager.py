@@ -11,6 +11,9 @@ import Game.globals as cdf
 g = cdf.Globals()
 
 def clickHandle(event):
+    """ Player's engine - handles click, checks move correctness and switches to computer's turn
+        If clicked just after begginging chooses gameplay mode.
+    """
     xMouse = event.x
     yMouse = event.y
     if g.running:
@@ -57,7 +60,8 @@ def doValidComputerMove():
     print("g.board.player, g.computerMove", g.board.player, g.computerMove)
     for x in range(8):
         for y in range(8):
-            if g.board.valid(g.board.player,x,y):
+            if g.computerMove and g.board.valid(g.board.player,x,y):
+                sleep(0.5)
                 g.board.boardMove(x, y)
                 sleep(0.002)
 
@@ -105,6 +109,8 @@ def playGame():
 
 
 def runGame():
+    """ Start game, create game board, let the player choose gameplay mode
+    """
     g.running = False
     print("g.running omg omg", g.running)
     # Title and shadow
