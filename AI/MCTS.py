@@ -1,5 +1,6 @@
 import random
 from AI.nodes import Node
+from Game.othello import get
 
 
 def select_uct_child(childNodes):
@@ -17,7 +18,7 @@ def select_uct_child(childNodes):
     return bestChildren[random.Next(bestChildren.Count)]
 
 
-def MCTS(initialState, numberOfIteration):
+def MCTS(initialState, numberOfIteration, Game):
     rootnode = Node(initialState)
     for _ in range(numberOfIteration):
         node = rootnode
@@ -31,15 +32,15 @@ def MCTS(initialState, numberOfIteration):
         if node.untriedMoves != []:
             move = random.choice(node.untried_moves)
             iteration_state.do_move(move)
-            node = node.AddChild(iteration_state, move)
+            node = node.add_child(iteration_state, move)
 
         # Playout
         while True:
-            all_possible_moves = GetAllPosibleMoves(iteration_state)
+            all_possible_moves = Game.get_all_posible_moves(iteration_state)
             if all_possible_moves == []:
                 break
             move = random.choice(all_possible_moves)
-            iteration_state = StateAfterMove(iteration_state, move)
+            iteration_state = Game.state_after_move(iteration_state, move)
 
         # Backpropagation
         result = GetResult(iterationState)

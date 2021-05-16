@@ -57,7 +57,6 @@ def clickHandle(event):
 
 def doValidComputerMove():
     #todo
-    x,y = MCTS()
     print("g.board.player, g.computerMove", g.board.player, g.computerMove)
     for x in range(8):
         for y in range(8):
@@ -78,7 +77,6 @@ def computerPlay():
     if (g.computerMove):
         if (g.board.mustPass()):
             doValidComputerMove()
-            
         g.switchPlayer()
         while (True):
             if g.computerMove:
