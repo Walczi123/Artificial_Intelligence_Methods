@@ -125,7 +125,13 @@ class Board:
 		else:
 			self.g.screen.create_text(250,550,anchor="c",font=("Consolas",15), text="The game is done!")
 
-	
+	def getAllPosibleMoves(self):
+		moveList = []
+		for x in range(8):
+			for y in range(8):
+					if self.valid(self.player,x,y)
+						moveList.append((x,y))
+
 	def boardMove(self,x,y):
 		""" Moves to position and updates 'oldplacements' table
 		"""
