@@ -45,8 +45,7 @@ class MASTNode:
         self.child_nodes = []
 
     def get_mast_score(self, c: float = sqrt(2)):
-        return self.wins / self.visits + c *
-        sqrt(log(self.parent.visits) / self.visits)
+        return self.wins / self.visits + c * sqrt(log(self.parent.visits) / self.visits)
 
     def add_child(self, move, state):
         self.child_nodes.append(Node(self, move, state))

@@ -4,7 +4,7 @@ from time import *
 from random import *
 from copy import deepcopy
 from tkinter import font
-import Game.othello as ot
+import Game.othello2 as ot
 import Game.globals as cdf
 
 

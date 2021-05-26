@@ -15,7 +15,7 @@ class Globals:
         self.depth = depth
         self.running = running
         self.nodes = nodes
-
+ 
         self.player1 = player1
         self.player2 = player2
         self.computerMove = bool(player1%2) # False # True if (player1 == 2 or player2 == 3) else False
