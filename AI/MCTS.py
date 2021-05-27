@@ -1,49 +1,52 @@
 import random
 from AI.nodes import Node
-from Game.othello import get
+import Game.othello2 as Game
 
 
 def select_uct_child(childNodes):
-    bestChildren = list()
-    bestScore = - float("inf")
+	bestChildren = list()
+	bestScore = - float("inf")
 
-    for childNode in childNodes:
-        score = childNode.get_uct_score()
-        if score > bestScore:
-            bestScore = score
-            bestChildren = {childNode}
-        elif score == bestScore:
-            bestChildren.append(childNode)
+	for childNode in childNodes:
+		score = childNode.get_uct_score()
+		if score > bestScore:
+			bestScore = score
+			bestChildren = {childNode}
+		elif score == bestScore:
+			bestChildren.append(childNode)
 
-    return bestChildren[random.Next(bestChildren.Count)]
+	return bestChildren[random.Next(bestChildren.Count)]
 
 
-def MCTS(initialState, numberOfIteration, Game):
-    rootnode = Node(initialState)
-    for _ in range(numberOfIteration):
-        node = rootnode
-        iteration_state = node.state
+def MCTS(initialState, player, numberOfIteration):
+	# rootnode = Node(initialState)
 
-        # Selection
-        while node.untriedMoves == [] and node.childNodes != []:
-            node = select_uct_child(node.child_nodes)
+	return Game.get_all_posible_moves(initialState, player)[0]
 
-        # Expansion
-        if node.untriedMoves != []:
-            move = random.choice(node.untried_moves)
-            iteration_state.do_move(move)
-            node = node.add_child(iteration_state, move)
+	for _ in range(numberOfIteration):
+		node = rootnode
+		iteration_state = node.state
 
-        # Playout
-        while True:
-            all_possible_moves = Game.get_all_posible_moves(iteration_state)
-            if all_possible_moves == []:
-                break
-            move = random.choice(all_possible_moves)
-            iteration_state = Game.state_after_move(iteration_state, move)
+		# Selection
+		while node.untriedMoves == [] and node.childNodes != []:
+			node = select_uct_child(node.child_nodes)
 
-        # Backpropagation
-        result = GetResult(iterationState)
-        node.Backpropagation(result)
+		# Expansion
+		if node.untriedMoves != []:
+			move = random.choice(node.untried_moves)
+			iteration_state.do_move(move)
+			node = node.add_child(iteration_state, move)
 
-    return sorted(rootnode.child_nodes, key=lambda c: c.visits)[-1].move
+		# Playout
+		while True:
+			all_possible_moves = Game.get_all_posible_moves(iteration_state, player)
+			if all_possible_moves == []:
+				break
+			move = random.choice(all_possible_moves)
+			iteration_state = Game.board_move(iteration_state, player, move)
+
+		# Backpropagation
+		result = Game.get_result(iteration_state, player)
+		node.Backpropagation(result)
+
+	return sorted(rootnode.child_nodes, key=lambda c: c.visits)[-1].move
