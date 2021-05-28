@@ -3,6 +3,9 @@ import Game.othello2 as ot
 import Game.globals as cdf
 import AI.MCTS as mcts
 import AI.Heuristic as heu
+import copy 
+
+from time import *
 
 g = cdf.Globals()
 
@@ -19,6 +22,10 @@ def runGame(f1,f2, printfinalResult, printSteps):
     Returns:
         int: Number of the winner
     """
+
+    if printfinalResult or printSteps:
+        drawGridBackground()
+
     g.board = ot.Board(g)
     passed_1 = False
     passed_2 = False
@@ -28,10 +35,13 @@ def runGame(f1,f2, printfinalResult, printSteps):
         passed_2 = False
 
         if not(ot.must_pass(g.board.placements, g.board.player)):
-            x, y = eval(str(f1(g.board.placements, g.board.player, 3)))
+            placements_to_pass = copy.deepcopy(g.board.placements)
+            x, y = eval(str(f1(placements_to_pass, g.board.player, 3)))
             g.board.oldplacements, g.board.placements = ot.board_move(g.board.placements, g.board.player, x, y)
             if printSteps:
+                print("0 " , x,y)
                 g.board.update()
+                sleep(1)
         else:
             passed_1 = True
 
@@ -41,7 +51,9 @@ def runGame(f1,f2, printfinalResult, printSteps):
             x, y = eval(str(f2(g.board.placements, g.board.player, 3)))
             g.board.oldplacements, g.board.placements = ot.board_move(g.board.placements, g.board.player, x, y)
             if printSteps:
+                print("1 ", x, y)
                 g.board.update()
+                sleep(1)
             g.switchPlayer()  # player1
         else:
             passed_2 = True
@@ -81,9 +93,8 @@ def drawGridBackground(outline=True):
 
 
 if __name__ == "__main__":
-    drawGridBackground()
 
-    print("Won:", runGame(mcts.MCTS, heu.heu, False, False))
+    print("Won:", runGame(mcts.MCTS, heu.heu, True, True))
     # # Binding, setting
     # g.screen.bind("<Button-1>", clickHandle)
     # g.screen.bind("<Key>", keyHandle)
