@@ -1,6 +1,6 @@
 import random
 from AI.nodes import Node
-import Game.othello2 as Game
+from Game.othello2 import get_all_posible_moves, board_move
 
 
 def select_uct_child(childNodes):
@@ -18,35 +18,43 @@ def select_uct_child(childNodes):
 	return bestChildren[random.Next(bestChildren.Count)]
 
 
-def MCTS(initialState, player, numberOfIteration):
-	# rootnode = Node(initialState)
-
-	return Game.get_all_posible_moves(initialState, player)[0]
-
-	for _ in range(numberOfIteration):
+def MCTS(initial_state, player, number_of_iteration):
+	rootnode = Node(None, None, initial_state, player)
+	for _ in range(number_of_iteration):
 		node = rootnode
 		iteration_state = node.state
 
 		# Selection
-		while node.untriedMoves == [] and node.childNodes != []:
+		while node.untried_moves == [] and node.child_nodes != []:
 			node = select_uct_child(node.child_nodes)
 
 		# Expansion
-		if node.untriedMoves != []:
+		if node.untried_moves != []:
 			move = random.choice(node.untried_moves)
-			iteration_state.do_move(move)
-			node = node.add_child(iteration_state, move)
+			_, iteration_state = board_move(iteration_state, node.player, move[0], move[1])
+			node = node.add_child(move, iteration_state, (node.player+1)%2)
 
 		# Playout
-		while True:
-			all_possible_moves = Game.get_all_posible_moves(iteration_state, player)
-			if all_possible_moves == []:
-				break
-			move = random.choice(all_possible_moves)
-			iteration_state = Game.board_move(iteration_state, player, move)
+		player = node.player
+		while True:          
+			all_possible_moves = get_all_posible_moves(iteration_state, player)
+			if  all_possible_moves != []:
+				move = random.choice(all_possible_moves)
+				_, iteration_state = board_move(iteration_state, player, move[0], move[1])
+				player = (player+1)%2
+				continue
+
+			player = (player+1)%2
+			all_possible_moves = get_all_posible_moves(iteration_state, player)
+			if  all_possible_moves != []:
+				move = random.choice(all_possible_moves)
+				board_move(iteration_state, player, move[0], move[1])
+				player = (player+1)%2
+				continue
+
+			break
 
 		# Backpropagation
-		result = Game.get_result(iteration_state, player)
-		node.Backpropagation(result)
+		node.backpropagation(iteration_state)
 
 	return sorted(rootnode.child_nodes, key=lambda c: c.visits)[-1].move
