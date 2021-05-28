@@ -83,7 +83,7 @@ def drawGridBackground(outline=True):
 if __name__ == "__main__":
     drawGridBackground()
 
-    print("Won:", runGame(mcts.MCTS, heu.heu, True, False))
+    print("Won:", runGame(mcts.MCTS, heu.heu, False, False))
     # # Binding, setting
     # g.screen.bind("<Button-1>", clickHandle)
     # g.screen.bind("<Key>", keyHandle)
