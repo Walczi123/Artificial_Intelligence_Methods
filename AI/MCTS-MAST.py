@@ -1,4 +1,5 @@
 import random
+import math
 from AI.nodes import MASTNode
 from Game.othello2 import get_all_posible_moves, board_move, change_player, get_result, get_all_moves
 
@@ -8,21 +9,22 @@ def update_table(global_table, state, moves):
             global_table[move[0]][0] += 1
         global_table[move[0]][1] += 1
 
-def get_mast_score(global_table, move):
-    wins, visits = global_table(move)
-    return wins/visits
+def get_mast_score(global_table, move, tau):
+    wins, visits = global_table[move]
+    return math.exp((wins * tau)/visits)
 
-
-def select_mast_child(global_table, childNodes):
+def select_mast_child(global_table, childNodes, tau):
     probabilities = list()
 
+    denumerator = sum([get_mast_score(global_table, move, tau) for move in global_table.values])
     for childNode in childNodes:
-        probabilities.append(global_table(childNode.move))
+        numerator = get_mast_score(global_table, childNode.move, tau)
+        probabilities.append(numerator/denumerator)
 
     return random.choice(childNodes, 1, p=probabilities)
 
 
-def MCTS(initial_state, player, number_of_iteration):
+def MCTS_MAST(initial_state, player, number_of_iteration, tau = 10):
     rootnode = MASTNode(None, None, initial_state, player)
     moves = []
     global_table = dict()
@@ -34,7 +36,7 @@ def MCTS(initial_state, player, number_of_iteration):
 
         # Selection
         while node.untried_moves == [] and node.child_nodes != []:
-            node = select_mast_child(global_table, node.child_nodes)
+            node = select_mast_child(global_table, node.child_nodes, tau)
             moves = [(node.move, node.player)]
 
         # Expansion

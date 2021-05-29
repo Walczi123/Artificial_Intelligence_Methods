@@ -17,7 +17,7 @@ def select_rave_child(childNodes):
 
     return bestChildren[random.Next(bestChildren.Count)]
 
-def MCTS(initial_state, player, number_of_iteration):
+def MCTS_RAVE(initial_state, player, number_of_iteration):
     rootnode = RAVENode(None, None, initial_state, player)
     for _ in range(number_of_iteration):
         node = rootnode
