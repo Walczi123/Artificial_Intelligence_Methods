@@ -1,5 +1,6 @@
 import random
 from AI.nodes import RAVENode
+from Game.othello2 import get_all_posible_moves, board_move, change_player
 
 
 def select_rave_child(childNodes):
@@ -16,33 +17,49 @@ def select_rave_child(childNodes):
 
     return bestChildren[random.Next(bestChildren.Count)]
 
-
-def MCTS_RAVE(initialState, numberOfIteration):
-    rootnode = RAVENode(initialState)
-    for _ in range(numberOfIteration):
+def MCTS_RAVE(initial_state, player, number_of_iteration):
+    rootnode = RAVENode(None, None, initial_state, player)
+    for _ in range(number_of_iteration):
         node = rootnode
         iteration_state = node.state
+        moves = []
 
         # Selection
-        while node.untriedMoves == [] and node.childNodes != []:
+        while node.untried_moves == [] and node.child_nodes != []:
             node = select_rave_child(node.child_nodes)
+            moves = [(node.move, node.player)]
+            
 
         # Expansion
-        if node.untriedMoves != []:
+        if node.untried_moves != []:
             move = random.choice(node.untried_moves)
-            iteration_state.do_move(move)
-            node = node.AddChild(iteration_state, move)
+            _, iteration_state = board_move(iteration_state, node.player, move[0], move[1])
+            node = node.add_child(move, iteration_state, change_player(node.player))
+            moves = [(node.move, node.player)]
 
         # Playout
-        while True:
-            all_possible_moves = GetAllPosibleMoves(iteration_state)
-            if all_possible_moves == []:
-                break
-            move = random.choice(all_possible_moves)
-            iteration_state = StateAfterMove(iteration_state, move)
+        player = node.player
+        while True:          
+            all_possible_moves = get_all_posible_moves(iteration_state, player)
+            if  all_possible_moves != []:
+                move = random.choice(all_possible_moves)
+                _, iteration_state = board_move(iteration_state, player, move[0], move[1])
+                moves = [(move, player)]
+                player = change_player(player)
+                continue
+
+            player = change_player(player)
+            all_possible_moves = get_all_posible_moves(iteration_state, player)
+            if  all_possible_moves != []:
+                move = random.choice(all_possible_moves)
+                _, iteration_state = board_move(iteration_state, player, move[0], move[1])
+                moves = [(move, player)]
+                player = change_player(player)
+                continue
+
+            break
 
         # Backpropagation
-        result = GetResult(iterationState)
-        node.Backpropagation(result)
+        node.backpropagation(iteration_state, moves)
 
     return sorted(rootnode.child_nodes, key=lambda c: c.visits)[-1].move
