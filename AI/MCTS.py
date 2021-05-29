@@ -48,7 +48,7 @@ def MCTS(initial_state, player, number_of_iteration):
 			all_possible_moves = get_all_posible_moves(iteration_state, player)
 			if  all_possible_moves != []:
 				move = random.choice(all_possible_moves)
-				board_move(iteration_state, player, move[0], move[1])
+				_, iteration_state = board_move(iteration_state, player, move[0], move[1])
 				player = change_player(player)
 				continue
 
