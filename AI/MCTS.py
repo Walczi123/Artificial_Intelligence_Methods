@@ -1,6 +1,6 @@
 import random
 from AI.nodes import Node
-from Game.othello2 import get_all_posible_moves, board_move
+from Game.othello2 import get_all_posible_moves, board_move, change_player
 
 
 def select_uct_child(childNodes):
@@ -32,7 +32,7 @@ def MCTS(initial_state, player, number_of_iteration):
 		if node.untried_moves != []:
 			move = random.choice(node.untried_moves)
 			_, iteration_state = board_move(iteration_state, node.player, move[0], move[1])
-			node = node.add_child(move, iteration_state, (node.player+1)%2)
+			node = node.add_child(move, iteration_state, change_player(node.player))
 
 		# Playout
 		player = node.player
@@ -41,15 +41,15 @@ def MCTS(initial_state, player, number_of_iteration):
 			if  all_possible_moves != []:
 				move = random.choice(all_possible_moves)
 				_, iteration_state = board_move(iteration_state, player, move[0], move[1])
-				player = (player+1)%2
+				player = change_player(player)
 				continue
 
-			player = (player+1)%2
+			player = change_player(player)
 			all_possible_moves = get_all_posible_moves(iteration_state, player)
 			if  all_possible_moves != []:
 				move = random.choice(all_possible_moves)
 				board_move(iteration_state, player, move[0], move[1])
-				player = (player+1)%2
+				player = change_player(player)
 				continue
 
 			break

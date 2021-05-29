@@ -185,6 +185,13 @@ def get_all_posible_moves(iteration_state, player):
 					moveList.append((x,y))
 	return moveList
 
+def get_all_moves(iteration_state):
+	moveList = []
+	for x in range(8):
+		for y in range(8):
+				moveList.append((x,y))
+	return moveList
+
 def board_move(iteration_state, player,x,y):
 	""" Moves to position and updates 'oldplacements' table
 	"""
@@ -364,3 +371,6 @@ def valid(iteration_state, player, x, y):
 			return False
 		else:
 			return valid
+
+def change_player(player):
+	return (player+1)%2

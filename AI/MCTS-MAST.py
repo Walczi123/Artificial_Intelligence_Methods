@@ -1,6 +1,12 @@
 import random
 from AI.nodes import MASTNode
+from Game.othello2 import get_all_posible_moves, board_move, change_player, get_result, get_all_moves
 
+def update_table(global_table, state, moves):
+    for move in moves:
+        if get_result(state, move[1]):
+            global_table[move[0]][0] += 1
+        global_table[move[0]][1] += 1
 
 def get_mast_score(global_table, move):
     wins, visits = global_table(move)
@@ -8,50 +14,59 @@ def get_mast_score(global_table, move):
 
 
 def select_mast_child(global_table, childNodes):
-    bestChildren = list()
-    bestScore = - float("inf")
+    probabilities = list()
 
     for childNode in childNodes:
-        wins, visits = global_table(childNode.move)
-        score = wins/visits
-        if score > bestScore:
-            bestScore = score
-            bestChildren = {childNode}
-        elif score == bestScore:
-            bestChildren.append(childNode)
+        probabilities.append(global_table(childNode.move))
 
-    return bestChildren[random.Next(bestChildren.Count)]
+    return random.choice(childNodes, 1, p=probabilities)
 
 
-def MCTS_MAST(initialState, numberOfIteration):
+def MCTS(initial_state, player, number_of_iteration):
+    rootnode = MASTNode(None, None, initial_state, player)
+    moves = []
     global_table = dict()
-    for move in all_moves():
-        global_table[move] = (0, 0)
-    rootnode = MASTNode(initialState)
-    for _ in range(numberOfIteration):
+    for move in get_all_moves(initial_state): #TODO Wszystkie czy wszystkie mozliwe
+        global_table[move] = (0, 0) # 0, 0? 
+    for _ in range(number_of_iteration):
         node = rootnode
         iteration_state = node.state
 
         # Selection
-        while node.untriedMoves == [] and node.childNodes != []:
+        while node.untried_moves == [] and node.child_nodes != []:
             node = select_mast_child(global_table, node.child_nodes)
+            moves = [(node.move, node.player)]
 
         # Expansion
-        if node.untriedMoves != []:
+        if node.untried_moves != []:
             move = random.choice(node.untried_moves)
-            iteration_state.do_move(move)
-            node = node.AddChild(iteration_state, move)
+            _, iteration_state = board_move(iteration_state, node.player, move[0], move[1])
+            node = node.add_child(move, iteration_state, change_player(node.player))
+            moves = [(node.move, node.player)]
 
         # Playout
-        while True:
-            all_possible_moves = GetAllPosibleMoves(iteration_state)
-            if all_possible_moves == []:
-                break
-            move = random.choice(all_possible_moves)
-            iteration_state = StateAfterMove(iteration_state, move)
+        player = node.player
+        while True:          
+            all_possible_moves = get_all_posible_moves(iteration_state, player)
+            if  all_possible_moves != []:
+                move = random.choice(all_possible_moves)
+                _, iteration_state = board_move(iteration_state, player, move[0], move[1])
+                moves = [(node.move, node.player)]
+                player = change_player(player)
+                continue
+
+            player = change_player(player)
+            all_possible_moves = get_all_posible_moves(iteration_state, player)
+            if  all_possible_moves != []:
+                move = random.choice(all_possible_moves)
+                board_move(iteration_state, player, move[0], move[1])
+                moves = [(node.move, node.player)]
+                player = change_player(player)
+                continue
+
+            break
 
         # Backpropagation
-        result = GetResult(iterationState)
-        node.Backpropagation(result)
+        update_table(global_table, iteration_state, moves)
 
     return sorted(rootnode.child_nodes, key=lambda c: c.visits)[-1].move
