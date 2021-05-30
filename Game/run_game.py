@@ -1,4 +1,3 @@
-
 import Game.othello2 as ot
 import Game.globals as cdf
 import AI.MCTS as mcts
@@ -9,8 +8,7 @@ from time import *
 
 g = cdf.Globals()
 
-
-def runGame(f1,f2, printfinalResult, printSteps):
+def run_game(f1,f2, printfinalResult=False, printSteps=False):
     """[summary]
 
     Args:
@@ -90,16 +88,3 @@ def drawGridBackground(outline=True):
 		g.screen.create_line(lineShift, 50, lineShift, 450, fill="#111")
 
 	g.screen.update()
-
-
-if __name__ == "__main__":
-
-    print("Won:", runGame(mcts.MCTS, heu.heu, True, True))
-    # # Binding, setting
-    # g.screen.bind("<Button-1>", clickHandle)
-    # g.screen.bind("<Key>", keyHandle)
-    # g.screen.focus_set()
-
-    # # Run forever
-    # g.root.wm_title("Not othello")
-    # g.root.mainloop()
