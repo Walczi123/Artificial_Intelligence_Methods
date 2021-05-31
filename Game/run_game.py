@@ -6,9 +6,11 @@ import copy
 
 from time import *
 
+WAIT_TIME = 0.5
+
 g = cdf.Globals()
 
-def run_game(f1,f2, printfinalResult=False, printSteps=False):
+def run_game(f1,f2, printfinalResult=False, printSteps=False, n_iterations=500):
     """[summary]
 
     Args:
@@ -34,24 +36,25 @@ def run_game(f1,f2, printfinalResult=False, printSteps=False):
 
         if not(ot.must_pass(g.board.placements, g.board.player)):
             placements_to_pass = copy.deepcopy(g.board.placements)
-            x, y = eval(str(f1(placements_to_pass, g.board.player, 3)))
+            x, y = eval(str(f1(placements_to_pass, g.board.player, n_iterations)))
             g.board.oldplacements, g.board.placements = ot.board_move(g.board.placements, g.board.player, x, y)
             if printSteps:
                 print("0 " , x,y)
                 g.board.update()
-                sleep(1)
+                sleep(WAIT_TIME)
         else:
             passed_1 = True
 
         g.switchPlayer()  #player2
 
         if not(ot.must_pass(g.board.placements, g.board.player)):
-            x, y = eval(str(f2(g.board.placements, g.board.player, 3)))
+            placements_to_pass = copy.deepcopy(g.board.placements)
+            x, y = eval(str(f2(placements_to_pass, g.board.player, n_iterations)))
             g.board.oldplacements, g.board.placements = ot.board_move(g.board.placements, g.board.player, x, y)
             if printSteps:
                 print("1 ", x, y)
                 g.board.update()
-                sleep(1)
+                sleep(WAIT_TIME)
             g.switchPlayer()  # player1
         else:
             passed_2 = True
@@ -60,7 +63,7 @@ def run_game(f1,f2, printfinalResult=False, printSteps=False):
                 passed_1 = True
 
     if printfinalResult:
-        g.board.update_without_animation(sleep_time = 1)
+        g.board.update_without_animation(sleep_time = WAIT_TIME)
 
     if ot.get_result(g.board.placements, g.board.player):
         return g.board.player

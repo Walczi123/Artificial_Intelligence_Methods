@@ -3,8 +3,9 @@ from Game.run_game import run_game
 
 
 class Test:
-    def __init__(self,  player1, player2, n_repetition=1, name="test", seed=None):
+    def __init__(self,  player1, player2, n_repetition=1, n_iterations=500, name="test", seed=None):
         self.n_repetition = n_repetition
+        self.n_iterations = n_iterations
         self.player1 = player1
         self.player2 = player2
         self.name = name
@@ -17,11 +18,11 @@ class Test:
             if self.seed is not None:
                 self.seed = self.seed + 1
                 np.random.seed(self.seed)
-            result = run_game(self.player1, self.player2)
+            result = run_game(self.player1, self.player2, n_iterations=self.n_iterations)
             results.append(result)
         self.seed = s
         self.save_to_file(results, "results/" +
-                          self.name + "_" + str(self.n_repetition) + "_" +str(self.seed) + ".txt")
+                          self.name + "_" + str(self.n_repetition) + "_" + str(self.n_iterations) + "_" +str(self.seed) + ".txt")
 
     def save_to_file(self, results, file_path):
         f = open(file_path, "w")
