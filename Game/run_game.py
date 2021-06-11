@@ -11,7 +11,7 @@ WAIT_TIME = 0.5
 g = cdf.Globals()
 DEPTH = 800
 
-def run_game(f1, f2, depth=DEPTH, printfinalResult=False, printSteps=False):
+def run_game(f1, f2, n_iterations=DEPTH, printfinalResult=False, printSteps=False):
     """[summary]
 
     Args:
@@ -38,7 +38,8 @@ def run_game(f1, f2, depth=DEPTH, printfinalResult=False, printSteps=False):
 
         if not(ot.must_pass(g.board.placements, g.board.player)):
             placements_to_pass = copy.deepcopy(g.board.placements)
-            x, y = eval(str(f1(placements_to_pass, g.board.player, depth)))
+            x, y = eval(
+                str(f1(placements_to_pass, g.board.player, n_iterations)))
 
             g.board.oldplacements, g.board.placements = ot.board_move(g.board.placements, g.board.player, x, y)
             if printSteps:
@@ -51,7 +52,9 @@ def run_game(f1, f2, depth=DEPTH, printfinalResult=False, printSteps=False):
         g.switchPlayer()  #player2
 
         if not(ot.must_pass(g.board.placements, g.board.player)):
-            x, y = eval(str(f2(g.board.placements, g.board.player, depth)))
+            placements_to_pass = copy.deepcopy(g.board.placements)
+            x, y = eval(
+                str(f2(placements_to_pass, g.board.player, n_iterations)))
             g.board.oldplacements, g.board.placements = ot.board_move(g.board.placements, g.board.player, x, y)
             if printSteps:
                 print("1 ", x, y)
@@ -66,7 +69,7 @@ def run_game(f1, f2, depth=DEPTH, printfinalResult=False, printSteps=False):
         moves_amount += 1
 
     if printfinalResult:
-        g.board.update_without_animation(sleep_time = WAIT_TIME)
+        g.board.update_without_animation(sleep_time = 10*WAIT_TIME)
 
     if ot.get_result(g.board.placements, g.board.player):
         return g.board.player, moves_amount
