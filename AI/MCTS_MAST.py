@@ -1,37 +1,35 @@
 import random
-import numpy as np
 import math
 from AI.nodes import MASTNode
 from Game.othello2 import get_all_posible_moves, board_move, change_player, get_result, get_all_moves
 
 def update_table(global_table, state, moves):
     for move in moves:
-        global_table[move[0]] = (global_table[move[0]][0] + get_result(state, move[1]), global_table[move[0]][1] + 1)
+        if get_result(state, move[1]):
+            global_table[move[0]][0] += 1
+        global_table[move[0]][1] += 1
 
 def get_mast_score(global_table, move, tau):
     wins, visits = global_table[move]
-    if visits == 0:
-        return 0
     return math.exp((wins * tau)/visits)
 
 def select_mast_child(global_table, childNodes, tau):
     probabilities = list()
-    denumerator = 0
-    for childNode in childNodes:
-        denumerator += get_mast_score(global_table, childNode.move, tau)
+
+    denumerator = sum([get_mast_score(global_table, move, tau) for move in global_table.values])
     for childNode in childNodes:
         numerator = get_mast_score(global_table, childNode.move, tau)
         probabilities.append(numerator/denumerator)
 
-    return np.random.choice(childNodes, p=probabilities)
+    return random.choice(childNodes, 1, p=probabilities)
 
 
 def MCTS_MAST(initial_state, player, number_of_iteration, tau = 10):
     rootnode = MASTNode(None, None, initial_state, player)
     moves = []
     global_table = dict()
-    for move in get_all_moves(initial_state): 
-        global_table[move] = (0, 0)
+    for move in get_all_moves(initial_state): #TODO Wszystkie czy wszystkie mozliwe
+        global_table[move] = (0, 0) # 0, 0? 
     for _ in range(number_of_iteration):
         node = rootnode
         iteration_state = node.state
@@ -45,7 +43,7 @@ def MCTS_MAST(initial_state, player, number_of_iteration, tau = 10):
         if node.untried_moves != []:
             move = random.choice(node.untried_moves)
             _, iteration_state = board_move(iteration_state, node.player, move[0], move[1])
-            node = node.add_child(move, iteration_state)
+            node = node.add_child(move, iteration_state, change_player(node.player))
             moves = [(node.move, node.player)]
 
         # Playout
