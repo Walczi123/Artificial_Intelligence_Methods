@@ -11,11 +11,11 @@ def select_uct_child(childNodes):
 		score = childNode.get_uct_score()
 		if score > bestScore:
 			bestScore = score
-			bestChildren = [childNode]
+			bestChildren = {childNode}
 		elif score == bestScore:
 			bestChildren.append(childNode)
 
-	return random.choice(bestChildren)
+	return bestChildren[random.Next(bestChildren.Count)]
 
 
 def MCTS(initial_state, player, number_of_iteration):
@@ -32,7 +32,7 @@ def MCTS(initial_state, player, number_of_iteration):
 		if node.untried_moves != []:
 			move = random.choice(node.untried_moves)
 			_, iteration_state = board_move(iteration_state, node.player, move[0], move[1])
-			node = node.add_child(move, iteration_state)
+			node = node.add_child(move, iteration_state, change_player(node.player))
 
 		# Playout
 		player = node.player
