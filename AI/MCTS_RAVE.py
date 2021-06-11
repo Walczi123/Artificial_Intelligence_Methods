@@ -11,12 +11,12 @@ def select_rave_child(childNodes):
         score = childNode.get_rave_score()
         if score > bestScore:
             bestScore = score
-            bestChildren = {childNode}
+            bestChildren = [childNode]
         elif score == bestScore:
             bestChildren.append(childNode)
 
-    return bestChildren[random.Next(bestChildren.Count)]
-
+    return random.choice(bestChildren)
+    
 def MCTS_RAVE(initial_state, player, number_of_iteration):
     rootnode = RAVENode(None, None, initial_state, player)
     for _ in range(number_of_iteration):
@@ -34,7 +34,7 @@ def MCTS_RAVE(initial_state, player, number_of_iteration):
         if node.untried_moves != []:
             move = random.choice(node.untried_moves)
             _, iteration_state = board_move(iteration_state, node.player, move[0], move[1])
-            node = node.add_child(move, iteration_state, change_player(node.player))
+            node = node.add_child(move, iteration_state)
             moves = [(node.move, node.player)]
 
         # Playout
