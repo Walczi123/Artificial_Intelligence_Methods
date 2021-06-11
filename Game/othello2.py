@@ -189,6 +189,7 @@ def get_all_moves(iteration_state):
 	moveList = []
 	for x in range(8):
 		for y in range(8):
+			if iteration_state[x][y] == None:
 				moveList.append((x,y))
 	return moveList
 
@@ -230,9 +231,17 @@ def get_result(iteration_state, player):
 				player1_score += 1
 			elif iteration_state[x][y] == 1:
 					player2_score += 1
+	if player1_score == player2_score:
+		return 0.5
 	if player == 0:
-		return player1_score > player2_score
-	return player1_score < player2_score
+		if player1_score > player2_score :
+			return 1
+		else :
+			return 0
+	if player1_score < player2_score :
+		return 1
+	else :
+		return 0
 
 		
 def move(iteration_state,  player, x, y):
