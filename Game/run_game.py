@@ -6,9 +6,10 @@ import copy
 
 from time import *
 
+WAIT_TIME = 0.5
+
 g = cdf.Globals()
 DEPTH = 800
-
 
 def run_game(f1, f2, depth=DEPTH, printfinalResult=False, printSteps=False):
     """[summary]
@@ -38,11 +39,12 @@ def run_game(f1, f2, depth=DEPTH, printfinalResult=False, printSteps=False):
         if not(ot.must_pass(g.board.placements, g.board.player)):
             placements_to_pass = copy.deepcopy(g.board.placements)
             x, y = eval(str(f1(placements_to_pass, g.board.player, depth)))
+
             g.board.oldplacements, g.board.placements = ot.board_move(g.board.placements, g.board.player, x, y)
             if printSteps:
                 print("0 " , x,y)
                 g.board.update()
-                sleep(1)
+                sleep(WAIT_TIME)
         else:
             passed_1 = True
 
@@ -54,7 +56,7 @@ def run_game(f1, f2, depth=DEPTH, printfinalResult=False, printSteps=False):
             if printSteps:
                 print("1 ", x, y)
                 g.board.update()
-                sleep(1)
+                sleep(WAIT_TIME)
             g.switchPlayer()  # player1
         else:
             passed_2 = True
@@ -64,7 +66,7 @@ def run_game(f1, f2, depth=DEPTH, printfinalResult=False, printSteps=False):
         moves_amount += 1
 
     if printfinalResult:
-        g.board.update_without_animation(sleep_time = 1)
+        g.board.update_without_animation(sleep_time = WAIT_TIME)
 
     if ot.get_result(g.board.placements, g.board.player):
         return g.board.player, moves_amount

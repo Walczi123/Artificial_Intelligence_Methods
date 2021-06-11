@@ -5,6 +5,7 @@ from Game.run_game import run_game
 class Test:
     def __init__(self,  player1, player2, n_repetition=1, name="test", seed=None, depth=800):
         self.n_repetition = n_repetition
+        self.n_iterations = n_iterations
         self.player1 = player1
         self.player2 = player2
         self.name = name
@@ -24,6 +25,7 @@ class Test:
         print("saving ", self.name)
         self.save_to_file(results, "Results/" +
                           self.name + "_" + str(self.n_repetition) + "_" + str(self.seed) + "_" + self.depth + ".txt")
+
 
     def save_to_file(self, results, file_path):
         f = open(file_path, "w")
