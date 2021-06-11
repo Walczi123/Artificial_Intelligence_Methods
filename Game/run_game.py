@@ -7,8 +7,10 @@ import copy
 from time import *
 
 g = cdf.Globals()
+DEPTH = 800
 
-def run_game(f1,f2, printfinalResult=False, printSteps=False):
+
+def run_game(f1, f2, depth=DEPTH, printfinalResult=False, printSteps=False):
     """[summary]
 
     Args:
@@ -27,6 +29,7 @@ def run_game(f1,f2, printfinalResult=False, printSteps=False):
     g.board = ot.Board(g)
     passed_1 = False
     passed_2 = False
+    moves_amount = 0
 
     while not(passed_2 and passed_1):
         passed_1 = False
@@ -34,7 +37,7 @@ def run_game(f1,f2, printfinalResult=False, printSteps=False):
 
         if not(ot.must_pass(g.board.placements, g.board.player)):
             placements_to_pass = copy.deepcopy(g.board.placements)
-            x, y = eval(str(f1(placements_to_pass, g.board.player, 3)))
+            x, y = eval(str(f1(placements_to_pass, g.board.player, depth)))
             g.board.oldplacements, g.board.placements = ot.board_move(g.board.placements, g.board.player, x, y)
             if printSteps:
                 print("0 " , x,y)
@@ -46,7 +49,7 @@ def run_game(f1,f2, printfinalResult=False, printSteps=False):
         g.switchPlayer()  #player2
 
         if not(ot.must_pass(g.board.placements, g.board.player)):
-            x, y = eval(str(f2(g.board.placements, g.board.player, 3)))
+            x, y = eval(str(f2(g.board.placements, g.board.player, depth)))
             g.board.oldplacements, g.board.placements = ot.board_move(g.board.placements, g.board.player, x, y)
             if printSteps:
                 print("1 ", x, y)
@@ -58,15 +61,16 @@ def run_game(f1,f2, printfinalResult=False, printSteps=False):
             g.switchPlayer()  # player1
             if ot.must_pass(g.board.placements, g.board.player):
                 passed_1 = True
+        moves_amount += 1
 
     if printfinalResult:
         g.board.update_without_animation(sleep_time = 1)
 
     if ot.get_result(g.board.placements, g.board.player):
-        return g.board.player
+        return g.board.player, moves_amount
     else:
         g.switchPlayer()
-        return g.board.player
+        return g.board.player, moves_amount
     
     
 
