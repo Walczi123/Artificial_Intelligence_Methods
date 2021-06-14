@@ -12,14 +12,14 @@ class Board:
 		self.g = globalValues
 		self.placements = create_start_state()
 		#Initializing old values
-		self.oldplacements = self.placements
+		self.oldplacements = deepcopy(self.placements)
 
 	
-	def update(self):
+	def update(self, i=0):
 		""" Redraw the board, animate changes beetween moves, 
 			add player possible moves signalization
 		"""
-		print("in update eeeeee")
+		print("in update i:", i)
 		self.g.screen.delete("highlight")
 		self.g.screen.delete("tile")
 		self.g.screen.delete("player_signalization")
@@ -39,6 +39,9 @@ class Board:
 		for x in range(8):
 			for y in range(8):
 				#Could replace the circles with images later, if I want
+				# print("self.oldplacements[x][y]", x, y)
+				# print("self.oldplacements[x][y]", self.oldplacements[x][y])
+				# print("self.placements[x][y]", self.placements[2])
 				if self.placements[x][y] != self.oldplacements[x][y] and self.placements[x][y] == 0:
 					self.g.screen.delete("{0}-{1}".format(x,y))
 					#42 is width of tile so 21 is half of that
@@ -197,7 +200,7 @@ def board_move(iteration_state, player,x,y):
 	""" Moves to position and updates 'oldplacements' table
 	"""
 	#Move and update self.g.screen
-	oldplacements = iteration_state
+	oldplacements = deepcopy(iteration_state)
 	# print("something")
 	if player%2 == 0 :
 		oldplacements[x][y]=0 #change

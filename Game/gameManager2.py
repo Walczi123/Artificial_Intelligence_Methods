@@ -6,10 +6,16 @@ from copy import deepcopy
 from tkinter import font
 import Game.othello2 as ot
 import Game.globals as cdf
-import AI.MCTS as mcts
+
+from AI.Heuristic import heu
+from AI.MCTS import MCTS
+from AI.MCTS_MAST import MCTS_MAST
+from AI.MCTS_RAVE import MCTS_RAVE
 
 
 g = cdf.Globals()
+algorithm = None
+TREE_ITERATIONS = 200
 
 def clickHandle(event):
 	""" Player's engine - handles click, checks move correctness and switches to computer's turn
@@ -25,87 +31,93 @@ def clickHandle(event):
 			elif xMouse <= 50 and yMouse <= 50:
 				playGame()
 			else:
+				if not(ot.must_pass(g.board.placements, g.board.player)):
 					# Delete the highlights
 					x = int((event.x-50)/50)
 					y = int((event.y-50)/50)
-					print("x, y", x, y)
 					# Determine the grid index for where the mouse was clicked
 
 					# If the click is inside the bounds and the move is valid, move to that location
 					if 0 <= x <= 7 and 0 <= y <= 7:
 						if ot.valid(g.board.placements, g.board.player, x, y):
-							print("valid, x, y", x, y)
-							g.board.update()
-							g.board.placements = ot.board_move(g.board.placements, g.board.player, x, y)
-							# g.board.player = not(g.board.player)
+							# g.board.update("2")
+							g.board.oldplacements, g.board.placements = ot.board_move(
+								g.board.placements, g.board.player, x, y)
 							g.switchPlayer()
 							g.board.update()
-							g.computerMove = True
 							doValidComputerMove()
+				else: 
+					g.switchPlayer()
+					if ot.must_pass(g.board.placements, g.board.player):
+						print("Game won")
+					else:
+					    doValidComputerMove()
 		else:
 			doValidComputerMove()
 	else:
 		# Gametype clicking
-	  
+
 		#One star
 		if 25<=xMouse<=155:
 			depth = 1
-			playTwoPeopleGame()
+			print("MCTS")
+			playAlgorithmvsGame(MCTS)
 		#Two star
 		elif 180<=xMouse<=310:
-			playGame()
+			print("rave")
+			playAlgorithmvsGame(MCTS_RAVE)
 		#Three star
 		elif 335<=xMouse<=465:
 			depth = 6
-			playTwoComputersGame()
-
-
-def playTwoPeopleGame():
-	return
-
-
-def playTwoComputersGame():
-	return
+			print("MCTS_MAST")
+			playAlgorithmvsGame(MCTS_MAST)
 
 
 def doValidComputerMove():
 	#todo
 	if g.computerMove:
-		x, y = mcts.MCTS(g.board.placements, g.board.player, 3)
-		sleep(0.5)
-		print("i'm doing thinking", x, y)
-		g.board.placements = ot.board_move(g.board.placements, g.board.player, x, y)
-		g.computerMove = False
-		sleep(0.002)
-
-
-def computerPlay():
-	if (g.computerMove):
-		if not(ot.must_pass(g.board.placements, g.player)):
-			doValidComputerMove()
+		if not(ot.must_pass(g.board.placements, g.board.player)):
+			print("thinking)")
+			placements = deepcopy(g.board.placements)
+			x, y = eval(
+				str(algorithm(placements, g.board.player, TREE_ITERATIONS)))
+			# x, y = MCTS(g.board.placements, g.board.player, TREE_ITERATIONS)
+			print("thinking2) ", x, y)
+			sleep(0.5)
+			g.board.oldplacements, g.board.placements = ot.board_move(
+				g.board.placements, g.board.player, x, y)
 			g.switchPlayer()
+			g.board.update()
+			if ot.must_pass(g.board.placements, g.board.player):
+				print("Game won")
+			# g.computerMove = False
 		else: 
-			g.computerMove = False
 			g.switchPlayer()
-			if not(ot.must_pass(g.board.placements, g.player)):
-				print("Game won")
-		
-		while (True):
-			if g.computerMove:
-				break
-			
-		if (ot.must_pass(g.board.placements, g.player)):
-			g.switchPlayer()
-			if ot.must_pass(g.board.placements, g.player):
-				print("Game won")
+			if ot.must_pass(g.board.placements, g.board.player):
+					print("Game won")
 			else:
-				computerPlay()
-				
-		
-		
-	
+				doValidComputerMove()
 
-def playGame():
+
+def playAlgorithmvsGame(alg):
+	global algorithm
+	algorithm = alg
+	g.running = True
+	g.screen.delete(ALL)
+	create_buttons()
+	# Draw the background
+	drawGridBackground()
+	# Create the g.board and update it
+
+	g.set_players(1, 0)
+	g.board = ot.Board(g, g.player1)
+	print("g.coputerMove", g.computerMove)
+	g.board.update()
+	doValidComputerMove()
+
+def playGamevsAlgorithm(alg):
+	global algorithm
+	algorithm = alg
 	g.running = True
 	g.screen.delete(ALL)
 	create_buttons()
@@ -113,11 +125,10 @@ def playGame():
 	drawGridBackground()
 	# Create the g.board and update it
 	
-	g.player1 = 0
-	g.player2 = 1
+	g.set_players(0,1)
 	g.board = ot.Board(g, g.player1)
-	print("computerMove here", g.computerMove)
 	g.board.update()
+
 
 
 
@@ -192,10 +203,7 @@ def create_buttons():
 		
 
 if __name__ == "__main__":
-#     # global gl
-
-	#     # gl = g.Globals()
-	print("here")
+	
 	runGame()
 
 	# # Binding, setting

@@ -28,3 +28,7 @@ class Globals:
             self.board.player = self.player1
             self.computerMove = bool(self.board.player%2)
 
+    def set_players(self, player1, player2):
+        self.player1 = player1
+        self.player2 = player2
+        self.computerMove = bool(player1 % 2)
