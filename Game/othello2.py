@@ -93,9 +93,12 @@ class Board:
 		if self.player == 0:
 			sleep(0.02)
 			self.g.screen.create_rectangle(60,455,440,465,tags="player_signalization", fill="white")
-		if self.player == 1 and not(self.g.computerMove):
+		if self.player == 1:
 			sleep(0.02)
 			self.g.screen.create_rectangle(60,455,440,465,tags="player_signalization", fill="black")
+			self.g.screen.create_text(250, 480, tags="player_signalization", anchor="c", text="Thinking...",
+                            font=("Consolas", 15), fill="black")
+	
 		for x in range(8):
 			for y in range(8):
 				if self.player == 0:

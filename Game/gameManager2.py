@@ -109,9 +109,11 @@ def playAlgorithmvsGame(alg):
 	drawGridBackground()
 	# Create the g.board and update it
 
-	g.set_players(1, 0)
+	g.set_players(1,0)
 	g.board = ot.Board(g, g.player1)
 	print("g.coputerMove", g.computerMove)
+	print("g.player1", g.player1)
+	print("g.player2", g.player2)
 	g.board.update()
 	doValidComputerMove()
 
