@@ -18,6 +18,13 @@ algorithm = None
 TREE_ITERATIONS = 5
 player_first = False
 
+algorithmNames={
+	'heu': 'Heuristic',
+	'MCTS': 'MCTS',
+	'MCTS_MAST': 'MAST',
+	'MCTS_RAVE': 'RAVE',
+}
+
 def clickHandle(event):
 	""" Player's engine - handles click, checks move correctness and switches to computer's turn
 		If clicked just after begginging chooses gameplay mode.
@@ -27,7 +34,6 @@ def clickHandle(event):
 	yMouse = event.y
 	if g.running1:
 		if g.running2:
-			print("g.running")
 			if not(g.computerMove):
 				if xMouse >= 450 and yMouse <= 50:
 					g.root.destroy()
@@ -53,8 +59,7 @@ def clickHandle(event):
 						g.switchPlayer()
 						if ot.must_pass(g.board.placements, g.board.player):
 							print("Game won")
-							g.won = True
-							g.board.update()
+							gameWonBoard()
 						else:
 							doValidComputerMove()
 			else:
@@ -62,32 +67,20 @@ def clickHandle(event):
 		else:
 			# Gametype clicking
 			g.running2 = True
+			
 			if 40 <= xMouse <= 250 and 360 <= yMouse <= 405:
-				print("MCTS")
-				if player_first:
-					playGamevsAlgorithm(MCTS)
-				else: 
-					playAlgorithmvsGame(MCTS)
-			#Two star
+				alg = MCTS
 			elif 260 <= xMouse <= 470 and 360 <= yMouse <= 405:
-				print("rave")
-				if player_first:
-					playGamevsAlgorithm(MCTS_RAVE)
-				else:
-					playAlgorithmvsGame(MCTS_RAVE)
-			#Three star
+				alg = MCTS_RAVE
 			elif 40 <= xMouse <= 250 and 415 <= yMouse <= 460:
-				print("MCTS_MAST")
-				if player_first:
-					playGamevsAlgorithm(MCTS_MAST)
-				else:
-					playAlgorithmvsGame(MCTS_MAST)
+				alg = MCTS_MAST
 			elif 260 <= xMouse <= 470 and 415 <= yMouse <= 460:
-				print("Heu")
-				if player_first:
-					playGamevsAlgorithm(heu)
-				else:
-					playAlgorithmvsGame(heu)
+				alg = heu
+				
+			if player_first:
+				playGamevsAlgorithm(alg)
+			else:
+				playAlgorithmvsGame(alg)
 	else:
 		if 40 <= xMouse <= 250:
 			player_first = True
@@ -113,16 +106,14 @@ def doValidComputerMove():
 			g.board.update()
 			if ot.must_pass(g.board.placements, g.board.player):
 				print("Game won")
-				g.won = True
-				g.board.update()
+				gameWonBoard()
 				
 			# g.computerMove = False
 		else: 
 			g.switchPlayer()
 			if ot.must_pass(g.board.placements, g.board.player):
 				print("Game won")
-				g.won = True
-				g.board.update()
+				gameWonBoard()
 			else:
 				doValidComputerMove()
 
@@ -130,18 +121,16 @@ def doValidComputerMove():
 def playAlgorithmvsGame(alg):
 	global algorithm
 	algorithm = alg
+
 	g.running = True
 	g.screen.delete(ALL)
 	create_buttons()
 	# Draw the background
 	drawGridBackground()
-	# Create the g.board and update it
+	markPlayers(alg)
 
 	g.set_players(1,0)
 	g.board = ot.Board(g, g.player1)
-	print("g.coputerMove", g.computerMove)
-	print("g.player1", g.player1)
-	print("g.player2", g.player2)
 	g.board.update()
 	doValidComputerMove()
 
@@ -153,14 +142,29 @@ def playGamevsAlgorithm(alg):
 	create_buttons()
 	# Draw the background
 	drawGridBackground()
-	# Create the g.board and update it
+	markPlayers(alg)
 	
 	g.set_players(0,1)
 	g.board = ot.Board(g, g.player1)
 	g.board.update()
 
 
+def markPlayers(alg):
+	g.screen.create_text(30, 500, anchor="w", tags="score_player", font=(
+		"Consolas", 15), fill="white", text="Player")
+	g.screen.create_text(400, 500, anchor="w", tags="score_player", font=(
+		"Consolas", 15), fill="black", text=algorithmNames[alg.__name__])
+	g.screen.update()
 
+def gameWonBoard():
+	sleep(0.4)
+	g.screen.delete(ALL)
+
+	g.running2 = False
+	g.board.drawScoreBoard()
+	markPlayers(algorithm)
+	g.screen.create_text(250, 220, anchor="c", font=(
+		"Consolas", 30), text="The game is done!")
 
 def runGame():
 	""" Start game, create game board, let the player choose gameplay mode
