@@ -19,7 +19,6 @@ class Board:
 		""" Redraw the board, animate changes beetween moves, 
 			add player possible moves signalization
 		"""
-		print("in update i:", i)
 		self.g.screen.delete("highlight")
 		self.g.screen.delete("tile")
 		self.g.screen.delete("player_signalization")
@@ -38,10 +37,6 @@ class Board:
 		sleep(0.12)
 		for x in range(8):
 			for y in range(8):
-				#Could replace the circles with images later, if I want
-				# print("self.oldplacements[x][y]", x, y)
-				# print("self.oldplacements[x][y]", self.oldplacements[x][y])
-				# print("self.placements[x][y]", self.placements[2])
 				if self.placements[x][y] != self.oldplacements[x][y] and self.placements[x][y] == 0:
 					self.g.screen.delete("{0}-{1}".format(x,y))
 					#42 is width of tile so 21 is half of that
@@ -117,7 +112,6 @@ class Board:
 			self.g.screen.create_text(250,550,anchor="c",font=("Consolas",15), text="The game is done!")
 
 	def drawScoreBoard(self):
-		print("Draw")
 		#Deleting prior score elements
 		self.g.screen.delete("score")
 
@@ -151,7 +145,6 @@ class Board:
 		""" Redraw the board, animate changes beetween moves, 
 			add player possible moves signalization
 		"""
-		print("in update")
 		self.g.screen.delete("highlight")
 		self.g.screen.delete("tile")
 		self.g.screen.delete("player_signalization")

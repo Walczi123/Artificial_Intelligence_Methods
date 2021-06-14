@@ -15,74 +15,97 @@ from AI.MCTS_RAVE import MCTS_RAVE
 
 g = cdf.Globals()
 algorithm = None
-TREE_ITERATIONS = 200
+TREE_ITERATIONS = 5
+player_first = False
 
 def clickHandle(event):
 	""" Player's engine - handles click, checks move correctness and switches to computer's turn
 		If clicked just after begginging chooses gameplay mode.
 	"""
+	global player_first
 	xMouse = event.x
 	yMouse = event.y
-	if g.running:
-		print("g.running")
-		if not(g.computerMove):
-			if xMouse >= 450 and yMouse <= 50:
-				g.root.destroy()
-			elif xMouse <= 50 and yMouse <= 50:
-				playGame()
-			else:
-				if not(ot.must_pass(g.board.placements, g.board.player)):
-					# Delete the highlights
-					x = int((event.x-50)/50)
-					y = int((event.y-50)/50)
-					# Determine the grid index for where the mouse was clicked
+	if g.running1:
+		if g.running2:
+			print("g.running")
+			if not(g.computerMove):
+				if xMouse >= 450 and yMouse <= 50:
+					g.root.destroy()
+				elif xMouse <= 50 and yMouse <= 50:
+					runGame()
+				else:
+					if not(ot.must_pass(g.board.placements, g.board.player)):
+						# Delete the highlights
+						x = int((event.x-50)/50)
+						y = int((event.y-50)/50)
+						# Determine the grid index for where the mouse was clicked
 
-					# If the click is inside the bounds and the move is valid, move to that location
-					if 0 <= x <= 7 and 0 <= y <= 7:
-						if ot.valid(g.board.placements, g.board.player, x, y):
-							# g.board.update("2")
-							g.board.oldplacements, g.board.placements = ot.board_move(
-								g.board.placements, g.board.player, x, y)
-							g.switchPlayer()
+						# If the click is inside the bounds and the move is valid, move to that location
+						if 0 <= x <= 7 and 0 <= y <= 7:
+							if ot.valid(g.board.placements, g.board.player, x, y):
+								# g.board.update("2")
+								g.board.oldplacements, g.board.placements = ot.board_move(
+									g.board.placements, g.board.player, x, y)
+								g.switchPlayer()
+								g.board.update()
+								doValidComputerMove()
+					else: 
+						g.switchPlayer()
+						if ot.must_pass(g.board.placements, g.board.player):
+							print("Game won")
+							g.won = True
 							g.board.update()
+						else:
 							doValidComputerMove()
-				else: 
-					g.switchPlayer()
-					if ot.must_pass(g.board.placements, g.board.player):
-						print("Game won")
-					else:
-					    doValidComputerMove()
+			else:
+				doValidComputerMove()
 		else:
-			doValidComputerMove()
+			# Gametype clicking
+			g.running2 = True
+			if 40 <= xMouse <= 250 and 360 <= yMouse <= 405:
+				print("MCTS")
+				if player_first:
+					playGamevsAlgorithm(MCTS)
+				else: 
+					playAlgorithmvsGame(MCTS)
+			#Two star
+			elif 260 <= xMouse <= 470 and 360 <= yMouse <= 405:
+				print("rave")
+				if player_first:
+					playGamevsAlgorithm(MCTS_RAVE)
+				else:
+					playAlgorithmvsGame(MCTS_RAVE)
+			#Three star
+			elif 40 <= xMouse <= 250 and 415 <= yMouse <= 460:
+				print("MCTS_MAST")
+				if player_first:
+					playGamevsAlgorithm(MCTS_MAST)
+				else:
+					playAlgorithmvsGame(MCTS_MAST)
+			elif 260 <= xMouse <= 470 and 415 <= yMouse <= 460:
+				print("Heu")
+				if player_first:
+					playGamevsAlgorithm(heu)
+				else:
+					playAlgorithmvsGame(heu)
 	else:
-		# Gametype clicking
+		if 40 <= xMouse <= 250:
+			player_first = True
+			#Two star
+		elif 260 <= xMouse <= 470:
+			player_first = False
+		g.running1 = True
+		setAlgorithm()
 
-		#One star
-		if 25<=xMouse<=155:
-			depth = 1
-			print("MCTS")
-			playAlgorithmvsGame(MCTS)
-		#Two star
-		elif 180<=xMouse<=310:
-			print("rave")
-			playAlgorithmvsGame(MCTS_RAVE)
-		#Three star
-		elif 335<=xMouse<=465:
-			depth = 6
-			print("MCTS_MAST")
-			playAlgorithmvsGame(MCTS_MAST)
 
 
 def doValidComputerMove():
 	#todo
 	if g.computerMove:
 		if not(ot.must_pass(g.board.placements, g.board.player)):
-			print("thinking)")
 			placements = deepcopy(g.board.placements)
 			x, y = eval(
 				str(algorithm(placements, g.board.player, TREE_ITERATIONS)))
-			# x, y = MCTS(g.board.placements, g.board.player, TREE_ITERATIONS)
-			print("thinking2) ", x, y)
 			sleep(0.5)
 			g.board.oldplacements, g.board.placements = ot.board_move(
 				g.board.placements, g.board.player, x, y)
@@ -90,11 +113,16 @@ def doValidComputerMove():
 			g.board.update()
 			if ot.must_pass(g.board.placements, g.board.player):
 				print("Game won")
+				g.won = True
+				g.board.update()
+				
 			# g.computerMove = False
 		else: 
 			g.switchPlayer()
 			if ot.must_pass(g.board.placements, g.board.player):
-					print("Game won")
+				print("Game won")
+				g.won = True
+				g.board.update()
 			else:
 				doValidComputerMove()
 
@@ -137,7 +165,8 @@ def playGamevsAlgorithm(alg):
 def runGame():
 	""" Start game, create game board, let the player choose gameplay mode
 	"""
-	g.running = False
+	g.screen.delete(ALL)
+	g.running1 = False
 	# Title and shadow
 	g.screen.create_text(250, 203, anchor="c", text="Othello", font=(
 		"Consolas", 50), fill="dark slate gray")
@@ -146,26 +175,70 @@ def runGame():
 
 	# Creating the play buttons, 1- two players, 2- player vs computer, 3- computer vs computerfor i in range(3):
 	# Background
-	i=1
-	g.screen.create_rectangle(
-		25+155*i, 310, 155+155*i, 355, fill="dark slate gray", outline="dark slate gray")
-	g.screen.create_rectangle(25+155*i, 300, 155+155*i,
-							  350, fill="cadet blue", outline="cadet blue")
+	# i=1
+	# g.screen.create_rectangle(
+	# 	25+155*i, 310, 155+155*i, 355, fill="dark slate gray", outline="dark slate gray")
+	# g.screen.create_rectangle(25+155*i, 300, 155+155*i,
+	# 						  350, fill="cadet blue", outline="cadet blue")
 
 	# # Creating the difficulty buttons
-	for i in range(3):
-			   # Background
-		g.screen.create_rectangle(
-			25+155*i, 310, 155+155*i, 355, fill="dark slate gray", outline="#000")
-		g.screen.create_rectangle(
-			25+155*i, 300, 155+155*i, 350, fill="cadet blue", outline="#111")
+	g.screen.create_rectangle(
+		40, 360, 250, 405, fill="dark slate gray", outline="#000")
+	g.screen.create_rectangle(
+		40, 350, 250, 400, fill="cadet blue", outline="#111")
 
-	spacing = 130/(3)
-	i=0
-	g.screen.create_text(25+(1)*spacing+155*i, 326, anchor="c", text="2", font=("Consolas", 25), fill="gainsboro")
-	g.screen.create_text(25+(2)*spacing+155*i, 327, anchor="c",  text="1", font=("Consolas", 25), fill="gainsboro")
-	g.screen.create_text(25+(3)*spacing+155*i, 325, anchor="c", text="Sim", font=("Consolas", 25), fill="gainsboro")
+	g.screen.create_rectangle(
+		260, 360, 470, 405, fill="dark slate gray", outline="#000")
+	g.screen.create_rectangle(
+		260, 350, 470, 400, fill="cadet blue", outline="#111")
+	
+	g.screen.create_text(250, 330, anchor="c", text="Who should be the first player?",
+                      font=("Consolas", 20), fill="white smoke")
+	g.screen.create_text(145, 375, anchor="c",
+	                     text="Me", font=("Consolas", 20), fill="gainsboro")
+	g.screen.create_text(365, 375, anchor="c",
+	                     text="Algorithm", font=("Consolas", 20), fill="gainsboro")
 
+def setAlgorithm():
+	g.screen.delete(ALL)
+	g.running2 = False
+	# Title and shadow
+	g.screen.create_text(250, 203, anchor="c", text="Othello", font=(
+		"Consolas", 50), fill="dark slate gray")
+	g.screen.create_text(250, 200, anchor="c", text="Othello",
+                      font=("Consolas", 50), fill="white smoke")
+
+	# # Creating the difficulty buttons
+	g.screen.create_rectangle(
+		40, 360, 250, 405, fill="dark slate gray", outline="#000")
+	g.screen.create_rectangle(
+		40, 350, 250, 400, fill="cadet blue", outline="#111")
+
+	g.screen.create_rectangle(
+		260, 360, 470, 405, fill="dark slate gray", outline="#000")
+	g.screen.create_rectangle(
+		260, 350, 470, 400, fill="cadet blue", outline="#111")
+	
+	g.screen.create_rectangle(
+		40, 415, 250, 460, fill="dark slate gray", outline="#000")
+	g.screen.create_rectangle(
+		40, 410, 250, 455, fill="cadet blue", outline="#111")
+
+	g.screen.create_rectangle(
+		260, 415, 470, 460, fill="dark slate gray", outline="#000")
+	g.screen.create_rectangle(
+		260, 410, 470, 455, fill="cadet blue", outline="#111")
+
+	g.screen.create_text(250, 330, anchor="c", text="Which algorithm would you like to test?",
+                      font=("Consolas", 15), fill="white smoke")
+	g.screen.create_text(145, 375, anchor="c",
+	                     text="MCTS", font=("Consolas", 20), fill="gainsboro")
+	g.screen.create_text(365, 375, anchor="c",
+	                     text="RAVE", font=("Consolas", 20), fill="gainsboro")
+	g.screen.create_text(145, 430, anchor="c",
+	                     text="MAST", font=("Consolas", 20), fill="gainsboro")
+	g.screen.create_text(365, 430, anchor="c",
+	                     text="Heur.", font=("Consolas", 20), fill="gainsboro")
 
 #Method for drawing the gridlines
 def drawGridBackground(outline=True):
