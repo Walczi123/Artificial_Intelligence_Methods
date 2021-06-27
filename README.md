@@ -1,1 +1,1 @@
-# Artificial_Intelligence_Methods
+The repository contains project from Artificial Intelligence Methods course.
